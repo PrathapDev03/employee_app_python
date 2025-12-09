@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Employee Manager</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="navbar">
+      <div class="navbar-left">
+        <div class="logo-circle">EM</div>
+        <div class="brand">
+          <h1>Admin Dashboard</h1>
+          <p>Insights for your employee data</p>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <a href="{{ url_for('list_employees') }}" class="btn ghost small">Employees</a>
+        <span class="user-chip">Hi, {{ user_name }}</span>
+        <a href="{{ url_for('logout') }}" class="btn ghost small">Logout</a>
+      </div>
+    </header>
+
+    <main class="page">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-container">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <section class="page-header">
+        <div>
+          <h2 class="page-title">Overview</h2>
+          <p class="page-subtitle">Key metrics from the employee database.</p>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <div class="dashboard-card">
+          <span class="stat-label">Total Employees</span>
+          <span class="stat-value big">{{ total }}</span>
+        </div>
+        <div class="dashboard-card">
+          <span class="stat-label">Total Salary (₹)</span>
+          <span class="stat-value big">{{ "%.0f"|format(total_salary) }}</span>
+        </div>
+        <div class="dashboard-card">
+          <span class="stat-label">Average Salary (₹)</span>
+          <span class="stat-value big">{{ "%.0f"|format(avg_salary) }}</span>
+        </div>
+        <div class="dashboard-card">
+          <span class="stat-label">Min / Max Salary (₹)</span>
+          <span class="stat-value small">
+            {{ "%.0f"|format(min_salary) }} – {{ "%.0f"|format(max_salary) }}
+          </span>
+        </div>
+      </section>
+
+      <section class="card chart-card">
+        <div class="card-header">
+          <h3>Employees by Designation</h3>
+          <p>See how your workforce is distributed across roles.</p>
+        </div>
+        <div class="chart-container">
+          <canvas id="designationChart"></canvas>
+        </div>
+      </section>
+
+      <section class="card chart-card">
+        <div class="card-header">
+          <h3>Employees by Salary Range</h3>
+          <p>Understand how salaries are distributed.</p>
+        </div>
+        <div class="chart-container">
+          <canvas id="salaryChart"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const designationLabels = {{ designation_labels | tojson }};
+    const designationValues = {{ designation_values | tojson }};
+    const bucketLabels = {{ bucket_labels | tojson }};
+    const bucketValues = {{ bucket_values | tojson }};
+
+    const ctx1 = document.getElementById('designationChart').getContext('2d');
+    new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: designationLabels,
+        datasets: [{
+          label: 'Employees',
+          data: designationValues,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+
+    const ctx2 = document.getElementById('salaryChart').getContext('2d');
+    new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: bucketLabels,
+        datasets: [{
+          label: 'Employees',
+          data: bucketValues,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
