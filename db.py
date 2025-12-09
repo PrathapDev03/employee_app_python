@@ -8,7 +8,7 @@ def get_connection():
     return conn
 
 def init_db():
-    """Create tables if they don't exist and seed an admin user."""
+    """Create tables if they don't exist."""
     conn = get_connection()
     try:
         cur = conn.cursor()
@@ -26,28 +26,39 @@ def init_db():
             """
         )
 
-        # Users table
+        # Visitors table
         cur.execute(
             """
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS visitors (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
+                email TEXT NOT NULL,
                 phone TEXT NOT NULL,
-                is_admin INTEGER NOT NULL DEFAULT 0
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
-            """
-        )
-
-        # Default admin (demo)
-        # Login: email = admin@example.com, phone = 9999999999
-        cur.execute(
-            """
-            INSERT OR IGNORE INTO users (id, name, email, phone, is_admin)
-            VALUES (1, 'Admin', 'admin@example.com', '9999999999', 1)
             """
         )
 
         conn.commit()
     finally:
         conn.close()
+def get_all_employees():
+    conn = get_connection()
+    employees = []
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id, firstName, lastName, salary, designation FROM emp")
+        rows = cur.fetchall()
+        for row in rows:
+            employees.append(
+                {
+                    "id": row[0],
+                    "first_name": row[1],
+                    "last_name": row[2],
+                    "salary": row[3],
+                    "designation": row[4],
+                }
+            )
+    finally:
+        conn.close()
+    return employees

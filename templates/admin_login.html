@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Login - Employee Manager</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="auth-body">
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="logo-circle">EM</div>
+        <h1>Admin Login</h1>
+        <p>Only administrators can manage data.</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-container">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="post" class="auth-form">
+        <label for="email">Admin Email</label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder="prathap03.p@gmail.com"
+          required
+        >
+
+        <label for="password">Password</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="********"
+          required
+        >
+
+        <button type="submit" class="btn primary full">
+          Login as Admin
+        </button>
+      </form>
+
+      <p class="auth-hint">
+        Back to visitor page? <a href="{{ url_for('visit') }}">Click here</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

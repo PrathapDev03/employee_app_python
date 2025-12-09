@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login - Employee Manager</title>
+  <title>Welcome - Employee Portal</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,8 +13,8 @@
     <div class="auth-card">
       <div class="auth-header">
         <div class="logo-circle">EM</div>
-        <h1>Employee Manager</h1>
-        <p>Login with your email and phone number to continue.</p>
+        <h1>Employee Management Portal</h1>
+        <p>Please enter your details to continue.</p>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -28,12 +28,21 @@
       {% endwith %}
 
       <form method="post" class="auth-form">
+        <label for="name">Full Name</label>
+        <input
+          type="text"
+          name="name"
+          id="name"
+          placeholder="Your name"
+          required
+        >
+
         <label for="email">Email</label>
         <input
           type="email"
           name="email"
           id="email"
-          placeholder="admin@example.com"
+          placeholder="you@example.com"
           required
         >
 
@@ -42,19 +51,17 @@
           type="text"
           name="phone"
           id="phone"
-          placeholder="9999999999"
+          placeholder="9876543210"
           required
         >
 
         <button type="submit" class="btn primary full">
-          Login
+          Continue to Dashboard
         </button>
       </form>
 
       <p class="auth-hint">
-        Demo admin credentials:<br>
-        <strong>Email:</strong> admin@example.com<br>
-        <strong>Phone:</strong> 9999999999
+        Admin? <a href="{{ url_for('admin_login') }}">Login here</a>
       </p>
     </div>
   </div>

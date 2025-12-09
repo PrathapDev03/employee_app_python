@@ -27,93 +27,118 @@ with app.app_context():
         print("DB init error:", e)
 
 
-# ---------- Decorators ---------- #
-
-def login_required(view_func):
-    @wraps(view_func)
-    def wrapper(*args, **kwargs):
-        if not session.get("user_id"):
-            return redirect(url_for("login"))
-        return view_func(*args, **kwargs)
-    return wrapper
-
+# --------- Helpers / Decorators --------- #
 
 def admin_required(view_func):
     @wraps(view_func)
     def wrapper(*args, **kwargs):
-        if not session.get("user_id"):
-            return redirect(url_for("login"))
-        if not session.get("is_admin"):
-            flash("You are not allowed to perform this action.", "error")
-            return redirect(url_for("list_employees"))
+        if session.get("role") != "admin":
+            return redirect(url_for("admin_login"))
         return view_func(*args, **kwargs)
     return wrapper
 
+def access_required(view_func):
+    """Visitor or admin must be logged in."""
+    @wraps(view_func)
+    def wrapper(*args, **kwargs):
+        if session.get("role") not in ("visitor", "admin"):
+            return redirect(url_for("visit"))
+        return view_func(*args, **kwargs)
+    return wrapper
 
-# ---------- Auth ---------- #
+def is_admin():
+    return session.get("role") == "admin"
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
+
+# --------- Visitor: Gate Page --------- #
+
+@app.route("/")
+def index():
+    if is_admin():
+        return redirect(url_for("dashboard"))
+    if session.get("role") == "visitor":
+        return redirect(url_for("employees"))
+    return redirect(url_for("visit"))
+
+@app.route("/visit", methods=["GET", "POST"])
+def visit():
+    # Visitor registration page
     if request.method == "POST":
+        name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip().lower()
         phone = request.form.get("phone", "").strip()
 
-        if not email or not phone:
-            flash("Please enter both email and phone number.", "error")
-            return redirect(url_for("login"))
+        if not name or not email or not phone:
+            flash("Please fill all fields.", "error")
+            return redirect(url_for("visit"))
 
         conn = get_connection()
         try:
             cur = conn.cursor()
             cur.execute(
-                "SELECT id, name, email, phone, is_admin FROM users WHERE LOWER(email) = ? AND phone = ?",
-                (email, phone),
+                "INSERT INTO visitors (name, email, phone) VALUES (?, ?, ?)",
+                (name, email, phone),
             )
-            row = cur.fetchone()
+            conn.commit()
         finally:
             conn.close()
 
-        if not row:
-            flash("Invalid email or phone. Access denied.", "error")
-            return redirect(url_for("login"))
+        # create visitor session
+        session["role"] = "visitor"
+        session["visitor_name"] = name
 
-        user_id, name, _, _, is_admin = row
+        # redirect to "dashboard" = employees list (read-only)
+        return redirect(url_for("employees"))
 
-        session["user_id"] = user_id
-        session["user_name"] = name
-        session["is_admin"] = bool(is_admin)
+    return render_template("visit.html")
 
-        flash(f"Welcome, {name}!", "success")
-        return redirect(url_for("list_employees"))
 
-    return render_template("login.html")
+# --------- Admin Login / Logout --------- #
 
+ADMIN_EMAIL = "prathap03.p@gmail.com"
+ADMIN_PASSWORD = "root121@"
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "").strip()
+
+        if email == ADMIN_EMAIL.lower() and password == ADMIN_PASSWORD:
+            session.clear()
+            session["role"] = "admin"
+            session["admin_email"] = ADMIN_EMAIL
+            session["admin_name"] = "Admin"
+            flash("Logged in as admin.", "success")
+            return redirect(url_for("dashboard"))
+        else:
+            flash("Invalid admin credentials.", "error")
+            return redirect(url_for("admin_login"))
+
+    return render_template("admin_login.html")
 
 @app.route("/logout")
 def logout():
     session.clear()
     flash("You have been logged out.", "success")
-    return redirect(url_for("login"))
+    return redirect(url_for("visit"))
 
 
-# ---------- Core pages ---------- #
-
-@app.route("/")
-def index():
-    return redirect(url_for("list_employees"))
-
+# --------- Employee Pages --------- #
 
 @app.route("/employees")
-@login_required
-def list_employees():
+@access_required
+def employees():
     employees = get_all_employees()
+    role = session.get("role")
+    name = session.get("admin_name") if is_admin() else session.get("visitor_name", "Visitor")
+
     return render_template(
         "employee_list.html",
         employees=employees,
-        is_admin=session.get("is_admin", False),
-        user_name=session.get("user_name", "User"),
+        is_admin=is_admin(),
+        user_name=name,
     )
-
 
 @app.route("/employees/add", methods=["GET", "POST"])
 @admin_required
@@ -135,14 +160,13 @@ def add_employee_view():
             flash("Employee added successfully!", "success")
         else:
             flash("Failed to add employee.", "error")
-        return redirect(url_for("list_employees"))
+        return redirect(url_for("employees"))
 
     return render_template(
         "employee_add.html",
-        is_admin=session.get("is_admin", False),
-        user_name=session.get("user_name", "User"),
+        is_admin=True,
+        user_name=session.get("admin_name", "Admin"),
     )
-
 
 @app.route("/employees/<int:emp_id>/edit", methods=["GET", "POST"])
 @admin_required
@@ -150,7 +174,7 @@ def edit_employee_view(emp_id: int):
     emp = get_employee_by_id(emp_id)
     if not emp:
         flash("Employee not found.", "error")
-        return redirect(url_for("list_employees"))
+        return redirect(url_for("employees"))
 
     if request.method == "POST":
         try:
@@ -166,15 +190,14 @@ def edit_employee_view(emp_id: int):
             flash("Employee updated successfully!", "success")
         else:
             flash("Failed to update employee.", "error")
-        return redirect(url_for("list_employees"))
+        return redirect(url_for("employees"))
 
     return render_template(
         "employee_edit.html",
         employee=emp,
-        is_admin=session.get("is_admin", False),
-        user_name=session.get("user_name", "User"),
+        is_admin=True,
+        user_name=session.get("admin_name", "Admin"),
     )
-
 
 @app.route("/employees/<int:emp_id>/delete", methods=["POST"])
 @admin_required
@@ -183,10 +206,10 @@ def delete_employee_view(emp_id: int):
         flash("Employee deleted.", "success")
     else:
         flash("Failed to delete employee.", "error")
-    return redirect(url_for("list_employees"))
+    return redirect(url_for("employees"))
 
 
-# ---------- Dashboard ---------- #
+# --------- Admin Dashboard + Visitors List --------- #
 
 @app.route("/dashboard")
 @admin_required
@@ -223,8 +246,38 @@ def dashboard():
         designation_values=list(designation_counts.values()),
         bucket_labels=list(salary_buckets.keys()),
         bucket_values=list(salary_buckets.values()),
-        is_admin=session.get("is_admin", False),
-        user_name=session.get("user_name", "User"),
+        is_admin=True,
+        user_name=session.get("admin_name", "Admin"),
+    )
+
+@app.route("/admin/visitors")
+@admin_required
+def admin_visitors():
+    conn = get_connection()
+    visitors = []
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT name, email, phone, created_at FROM visitors ORDER BY id DESC"
+        )
+        rows = cur.fetchall()
+        for row in rows:
+            visitors.append(
+                {
+                    "name": row[0],
+                    "email": row[1],
+                    "phone": row[2],
+                    "created_at": row[3],
+                }
+            )
+    finally:
+        conn.close()
+
+    return render_template(
+        "admin_visitors.html",
+        visitors=visitors,
+        is_admin=True,
+        user_name=session.get("admin_name", "Admin"),
     )
 
 

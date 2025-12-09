@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Visitors - Employee Manager</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="navbar">
+      <div class="navbar-left">
+        <div class="logo-circle">EM</div>
+        <div class="brand">
+          <h1>Visitor Logs</h1>
+          <p>Only admin can view these details.</p>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <a href="{{ url_for('dashboard') }}" class="btn ghost small">Dashboard</a>
+        <a href="{{ url_for('employees') }}" class="btn ghost small">Employees</a>
+        <span class="user-chip">Admin: {{ user_name }}</span>
+        <a href="{{ url_for('logout') }}" class="btn ghost small">Logout</a>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="card">
+        <div class="card-header">
+          <h3>Visitor Details</h3>
+          <p>All visitor entries stored from the homepage.</p>
+        </div>
+        <div class="table-wrapper">
+          <table class="cool-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Visited At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for v in visitors %}
+                <tr>
+                  <td data-label="Name">{{ v.name }}</td>
+                  <td data-label="Email">{{ v.email }}</td>
+                  <td data-label="Phone">{{ v.phone }}</td>
+                  <td data-label="Visited At">{{ v.created_at }}</td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="4" class="empty-row">
+                    No visitors yet.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

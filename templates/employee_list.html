@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Employee Management</title>
+  <title>Employee Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,14 +16,18 @@
         <div class="logo-circle">EM</div>
         <div class="brand">
           <h1>Employee Manager</h1>
-          <p>Manage your team in one place</p>
+          <p>Interactive employee dashboard</p>
         </div>
       </div>
       <div class="navbar-right">
         {% if is_admin %}
-          <a href="{{ url_for('dashboard') }}" class="btn ghost small">Dashboard</a>
+          <a href="{{ url_for('dashboard') }}" class="btn ghost small">Admin Dashboard</a>
+          <a href="{{ url_for('admin_visitors') }}" class="btn ghost small">Visitors</a>
+          <span class="user-chip">Admin: {{ user_name }}</span>
+        {% else %}
+          <span class="user-chip">Visitor: {{ user_name }}</span>
+          <a href="{{ url_for('admin_login') }}" class="btn ghost small">Admin Login</a>
         {% endif %}
-        <span class="user-chip">Hi, {{ user_name }}</span>
         <a href="{{ url_for('logout') }}" class="btn ghost small">Logout</a>
       </div>
     </header>
@@ -42,8 +46,14 @@
 
       <section class="page-header">
         <div>
-          <h2 class="page-title">All Employees</h2>
-          <p class="page-subtitle">View employee records. Only admins can modify.</p>
+          <h2 class="page-title">Employees</h2>
+          <p class="page-subtitle">
+            {% if is_admin %}
+              Manage employee data and structure.
+            {% else %}
+              Read-only view of employee information.
+            {% endif %}
+          </p>
         </div>
         {% if is_admin %}
           <a href="{{ url_for('add_employee_view') }}" class="btn primary">
@@ -59,14 +69,18 @@
         </div>
         <div class="stat-card">
           <span class="stat-label">Mode</span>
-          <span class="stat-badge online">Read-Only for Visitors</span>
+          {% if is_admin %}
+            <span class="stat-badge online">Admin Control</span>
+          {% else %}
+            <span class="stat-badge online">Visitor · Read-Only</span>
+          {% endif %}
         </div>
       </section>
 
       <section class="card">
         <div class="card-header">
           <h3>Employee Directory</h3>
-          <p>Hover over rows to see options.</p>
+          <p>Hover over rows for smooth highlight.</p>
         </div>
         <div class="table-wrapper">
           <table class="cool-table">
@@ -76,11 +90,9 @@
                 <th>Employee</th>
                 <th>Salary</th>
                 <th>Designation</th>
-                {% if is_admin %}
-                  <th class="actions-col">Actions</th>
-                {% else %}
-                  <th class="actions-col"></th>
-                {% endif %}
+                <th class="actions-col">
+                  {% if is_admin %}Actions{% endif %}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -121,7 +133,7 @@
               {% else %}
                 <tr>
                   <td colspan="5" class="empty-row">
-                    No employees found. {% if is_admin %}Click <strong>“Add Employee”</strong> to create one.{% else %}Ask admin to add employees.{% endif %}
+                    No employees found. {% if is_admin %}Add some using the button above.{% else %}Please contact admin.{% endif %}
                   </td>
                 </tr>
               {% endfor %}
