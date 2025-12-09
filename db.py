@@ -1,20 +1,13 @@
 import os
-import mysql.connector
+import sqlite3
 
-DB_HOST = os.getenv('DB_HOST', 'localhost')
-DB_PORT = int(os.getenv('DB_PORT', '3306'))
-DB_NAME = os.getenv('DB_NAME', 'employee_db')
-DB_USER = os.getenv('DB_USER', 'root')
-DB_PASS = os.getenv('DB_PASS', '')
+# DB file will be created in the project folder
+DB_PATH = os.path.join(os.path.dirname(__file__), "employees.db")
 
 def get_connection():
-    return mysql.connector.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASS,
-    )
+    # row_factory gives dict-like access if needed later
+    conn = sqlite3.connect(DB_PATH)
+    return conn
 
 def init_db():
     """Create the emp table if it doesn't exist."""
@@ -22,15 +15,15 @@ def init_db():
     try:
         cur = conn.cursor()
         cur.execute(
-            '''
+            """
             CREATE TABLE IF NOT EXISTS emp (
-                id INT PRIMARY KEY,
-                firstName VARCHAR(100) NOT NULL,
-                lastName VARCHAR(100) NOT NULL,
-                salary DOUBLE NOT NULL,
-                designation VARCHAR(100) NOT NULL
+                id INTEGER PRIMARY KEY,
+                firstName TEXT NOT NULL,
+                lastName TEXT NOT NULL,
+                salary REAL NOT NULL,
+                designation TEXT NOT NULL
             )
-            '''
+            """
         )
         conn.commit()
     finally:
