@@ -20,7 +20,8 @@
         </div>
       </div>
       <div class="navbar-right">
-        <a href="{{ url_for('list_employees') }}" class="btn ghost small">Employees</a>
+        <a href="{{ url_for('employees') }}" class="btn ghost small">Employees</a>
+        <a href="{{ url_for('admin_visitors') }}" class="btn ghost small">Visitors</a>
         <span class="user-chip">Hi, {{ user_name }}</span>
         <a href="{{ url_for('logout') }}" class="btn ghost small">Logout</a>
       </div>

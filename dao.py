@@ -66,10 +66,10 @@ def get_employee_by_id(emp_id: int) -> Optional[Employee]:
     finally:
         conn.close()
 
-def get_all_employees():
+def get_all_employees() -> List[Employee]:
     sql = "SELECT id, firstName, lastName, salary, designation FROM emp"
     conn = get_connection()
-    employees = []
+    employees: List[Employee] = []
     try:
         cur = conn.cursor()
         cur.execute(sql)

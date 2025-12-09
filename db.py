@@ -42,23 +42,3 @@ def init_db():
         conn.commit()
     finally:
         conn.close()
-def get_all_employees():
-    conn = get_connection()
-    employees = []
-    try:
-        cur = conn.cursor()
-        cur.execute("SELECT id, firstName, lastName, salary, designation FROM emp")
-        rows = cur.fetchall()
-        for row in rows:
-            employees.append(
-                {
-                    "id": row[0],
-                    "first_name": row[1],
-                    "last_name": row[2],
-                    "salary": row[3],
-                    "designation": row[4],
-                }
-            )
-    finally:
-        conn.close()
-    return employees

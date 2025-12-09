@@ -135,7 +135,8 @@ body {
   text-decoration: none;
   border: none;
   cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.08s ease;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.08s ease,
+    background 0.08s ease;
 }
 
 .btn.primary {
@@ -282,7 +283,7 @@ body {
 
 .cool-table tbody tr {
   border-bottom: 1px solid rgba(55, 65, 81, 0.7);
-  transition: background 0.12s ease, transform 0.06s ease;
+  transition: background 0.12s ease, transform 0.06s ease, box-shadow 0.12s ease;
 }
 
 .cool-table tbody tr:nth-child(even) {
@@ -292,6 +293,7 @@ body {
 .cool-table tbody tr:hover {
   background: rgba(37, 99, 235, 0.13);
   transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.8);
 }
 
 .cool-table td {
@@ -469,6 +471,15 @@ body {
   font-size: 12px;
   color: #9ca3af;
   text-align: center;
+}
+
+.auth-hint a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.auth-hint a:hover {
+  text-decoration: underline;
 }
 
 /* ===== Dashboard ===== */

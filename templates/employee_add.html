@@ -20,7 +20,8 @@
       </div>
       <div class="navbar-right">
         <a href="{{ url_for('dashboard') }}" class="btn ghost small">Dashboard</a>
-        <span class="user-chip">Hi, {{ user_name }}</span>
+        <a href="{{ url_for('employees') }}" class="btn ghost small">Employees</a>
+        <span class="user-chip">Admin: {{ user_name }}</span>
         <a href="{{ url_for('logout') }}" class="btn ghost small">Logout</a>
       </div>
     </header>
@@ -66,7 +67,7 @@
           </div>
           <div class="form-actions">
             <button type="submit" class="btn primary">Save</button>
-            <a href="{{ url_for('list_employees') }}" class="btn ghost">Cancel</a>
+            <a href="{{ url_for('employees') }}" class="btn ghost">Cancel</a>
           </div>
         </form>
       </section>

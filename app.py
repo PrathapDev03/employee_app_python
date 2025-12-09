@@ -37,6 +37,7 @@ def admin_required(view_func):
         return view_func(*args, **kwargs)
     return wrapper
 
+
 def access_required(view_func):
     """Visitor or admin must be logged in."""
     @wraps(view_func)
@@ -45,6 +46,7 @@ def access_required(view_func):
             return redirect(url_for("visit"))
         return view_func(*args, **kwargs)
     return wrapper
+
 
 def is_admin():
     return session.get("role") == "admin"
@@ -59,6 +61,7 @@ def index():
     if session.get("role") == "visitor":
         return redirect(url_for("employees"))
     return redirect(url_for("visit"))
+
 
 @app.route("/visit", methods=["GET", "POST"])
 def visit():
@@ -84,10 +87,11 @@ def visit():
             conn.close()
 
         # create visitor session
+        session.clear()
         session["role"] = "visitor"
         session["visitor_name"] = name
 
-        # redirect to "dashboard" = employees list (read-only)
+        # redirect to employee list (read-only)
         return redirect(url_for("employees"))
 
     return render_template("visit.html")
@@ -97,6 +101,7 @@ def visit():
 
 ADMIN_EMAIL = "prathap03.p@gmail.com"
 ADMIN_PASSWORD = "root121@"
+
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
@@ -117,6 +122,7 @@ def admin_login():
 
     return render_template("admin_login.html")
 
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -130,7 +136,6 @@ def logout():
 @access_required
 def employees():
     employees = get_all_employees()
-    role = session.get("role")
     name = session.get("admin_name") if is_admin() else session.get("visitor_name", "Visitor")
 
     return render_template(
@@ -139,6 +144,7 @@ def employees():
         is_admin=is_admin(),
         user_name=name,
     )
+
 
 @app.route("/employees/add", methods=["GET", "POST"])
 @admin_required
@@ -167,6 +173,7 @@ def add_employee_view():
         is_admin=True,
         user_name=session.get("admin_name", "Admin"),
     )
+
 
 @app.route("/employees/<int:emp_id>/edit", methods=["GET", "POST"])
 @admin_required
@@ -199,6 +206,7 @@ def edit_employee_view(emp_id: int):
         user_name=session.get("admin_name", "Admin"),
     )
 
+
 @app.route("/employees/<int:emp_id>/delete", methods=["POST"])
 @admin_required
 def delete_employee_view(emp_id: int):
@@ -221,6 +229,7 @@ def dashboard():
     max_salary = max((e.salary for e in employees), default=0)
     min_salary = min((e.salary for e in employees), default=0)
 
+    from collections import Counter
     designation_counts = Counter(e.designation for e in employees)
 
     salary_buckets = {"< 3L": 0, "3L - 6L": 0, "6L - 10L": 0, "> 10L": 0}
@@ -249,6 +258,7 @@ def dashboard():
         is_admin=True,
         user_name=session.get("admin_name", "Admin"),
     )
+
 
 @app.route("/admin/visitors")
 @admin_required
