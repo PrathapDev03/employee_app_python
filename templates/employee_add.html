@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Employee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Add Employee</h1>
+    <form method="post">
+        <label>ID</label>
+        <input type="number" name="id" required>
+
+        <label>First Name</label>
+        <input type="text" name="firstName" required>
+
+        <label>Last Name</label>
+        <input type="text" name="lastName" required>
+
+        <label>Salary</label>
+        <input type="number" step="0.01" name="salary" required>
+
+        <label>Designation</label>
+        <input type="text" name="designation" required>
+
+        <button type="submit">Save</button>
+    </form>
+
+    <a href="{{ url_for('list_employees') }}">Back</a>
+</div>
+</body>
+</html>

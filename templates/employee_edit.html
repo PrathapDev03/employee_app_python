@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Employee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Edit Employee</h1>
+    <form method="post">
+        <label>ID</label>
+        <input type="number" name="id" value="{{ employee.id }}" disabled>
+
+        <label>First Name</label>
+        <input type="text" name="firstName" value="{{ employee.first_name }}" required>
+
+        <label>Last Name</label>
+        <input type="text" name="lastName" value="{{ employee.last_name }}" required>
+
+        <label>Salary</label>
+        <input type="number" step="0.01" name="salary" value="{{ employee.salary }}" required>
+
+        <label>Designation</label>
+        <input type="text" name="designation" value="{{ employee.designation }}" required>
+
+        <button type="submit">Update</button>
+    </form>
+
+    <a href="{{ url_for('list_employees') }}">Back</a>
+</div>
+</body>
+</html>
